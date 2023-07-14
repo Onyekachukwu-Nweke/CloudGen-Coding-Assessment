@@ -14,4 +14,4 @@ architecture and instructions to execute the scripts.
 
 ## Architectural Diagram of our Web Application
 
-![Architectural Diagram](CloudGen-Coding-Assessment/img/architectural_diagram.png)
+![Architectural Diagram](/img/architectural_diagram.png)

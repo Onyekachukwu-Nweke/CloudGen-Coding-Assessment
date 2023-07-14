@@ -12,6 +12,7 @@ between them.
 Provide the Terraform scripts and a README file that explains the
 architecture and instructions to execute the scripts.
 
-## Architectural Diagram of our Web Application
+## Infrastructure Diagram of our Web Application
 
-![Architectural Diagram](/img/architectural_diagram.png)
+![Infrastructural Diagram](/img/architectural_diagram.png)
+

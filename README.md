@@ -11,3 +11,7 @@ between them.
 
 Provide the Terraform scripts and a README file that explains the
 architecture and instructions to execute the scripts.
+
+## Architectural Diagram of our Web Application
+
+![Architectural Diagram](CloudGen-Coding-Assessment/img/architectural_diagram.png)

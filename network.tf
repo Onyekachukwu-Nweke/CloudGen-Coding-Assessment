@@ -9,6 +9,7 @@ resource "aws_vpc" "main" {
   }
 }
 
+# Creates an internet gateway to route traffic from the internet
 resource "aws_internet_gateway" "internet_gw" {
   tags = {
     Name = var.internet_gw
@@ -19,6 +20,48 @@ resource "aws_internet_gateway" "internet_gw" {
 resource "aws_internet_gateway_attachment" "igw-attach" {
   internet_gateway_id = aws_internet_gateway.internet_gw.id
   vpc_id              = aws_vpc.main.id
+}
+
+# Create an Elastic IP for NAT Gateway 1
+resource "aws_eip" "eip1" {
+  vpc        = true
+  depends_on = [aws_internet_gateway.igw]
+  tags = {
+    Name = "web_app-eip1"
+  }
+}
+
+# Create an Elastic IP for NAT Gateway 2
+resource "aws_eip" "eip2" {
+  vpc        = true
+  depends_on = [aws_internet_gateway.igw]
+  tags = {
+    Name = "web_app-eip2"
+  }
+}
+
+# Create NAT Gateway 1
+
+resource "aws_nat_gateway" "nat-gatw1" {
+  allocation_id = aws_eip.eip1.id
+  subnet_id     = aws_subnet.pub-sub1.id
+
+  tags = {
+    Name = "eks-nat1"
+  }
+  depends_on = [aws_internet_gateway.igw]
+}
+
+# Create a NAT Gateway 2
+
+resource "aws_nat_gateway" "nat-gatw2" {
+  allocation_id = aws_eip.eip2.id
+  subnet_id     = aws_subnet.pub-sub2.id
+
+  tags = {
+    Name = "eks-nat2"
+  }
+  depends_on = [aws_internet_gateway.igw]
 }
 
 # Creates a public subnet in each Availability Zone

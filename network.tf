@@ -40,30 +40,6 @@ resource "aws_eip" "eip2" {
   }
 }
 
-# Create NAT Gateway 1
-
-resource "aws_nat_gateway" "nat-gatw1" {
-  allocation_id = aws_eip.eip1.id
-  subnet_id     = aws_subnet.pub-sub1.id
-
-  tags = {
-    Name = "eks-nat1"
-  }
-  depends_on = [aws_internet_gateway.igw]
-}
-
-# Create a NAT Gateway 2
-
-resource "aws_nat_gateway" "nat-gatw2" {
-  allocation_id = aws_eip.eip2.id
-  subnet_id     = aws_subnet.pub-sub2.id
-
-  tags = {
-    Name = "eks-nat2"
-  }
-  depends_on = [aws_internet_gateway.igw]
-}
-
 # Creates a public subnet in each Availability Zone
 resource "aws_subnet" "public_subnets" {
   count                   = length(var.availability_zones)
@@ -80,6 +56,28 @@ resource "aws_subnet" "private_subnets" {
   cidr_block              = cidrsubnet(aws_vpc.example.cidr_block, 8, count.index + 2)
   availability_zone       = var.availability_zones[count.index]
   map_public_ip_on_launch = false
+}
+
+# Create NAT Gateway 1
+resource "aws_nat_gateway" "nat-gatw1" {
+  allocation_id = aws_eip.eip1.id
+  subnet_id     = element(aws_subnet.public_subnets[*].id, 0)
+
+  tags = {
+    Name = "web_app-nat1"
+  }
+  depends_on = [aws_internet_gateway.igw]
+}
+
+# Create a NAT Gateway 2
+resource "aws_nat_gateway" "nat-gatw2" {
+  allocation_id = aws_eip.eip2.id
+  subnet_id     = element(aws_subnet.public_subnets[*].id, 1)
+
+  tags = {
+    Name = "web_app-nat2"
+  }
+  depends_on = [aws_internet_gateway.igw]
 }
 
 # Creates private route table for private subnet 1

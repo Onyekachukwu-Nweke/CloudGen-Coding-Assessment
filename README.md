@@ -20,7 +20,7 @@ architecture and instructions to execute the scripts.
 - [Assumptions](#assumptions)
 - [Infrastructure Overview](#infrastructure-overview-of-our-web-application)
 - [Terraform Setup](#terraform-setup)
-- [Terraform Configuration]()
+- [Terraform Configuration](#terraform-configuration)
 - [Deploying Infrastructure]()
 - [Clean Up]()
 - [Technical Trade-Offs]()
@@ -181,4 +181,57 @@ resource "aws_eip" "eip2" {
 }
 ```
 
-5. __Creation of NAT Gateways__
+5. __Creation of Both Public and Private Subnets__
+
+Defines the creation of Public and Private subnet in each availability zone
+
+```
+# Creates a public subnet in each Availability Zone
+resource "aws_subnet" "public_subnets" {
+  count                   = length(var.availability_zones)
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = cidrsubnet(aws_vpc.example.cidr_block, 8, count.index)
+  availability_zone       = var.availability_zones[count.index]
+  map_public_ip_on_launch = true
+}
+
+# Creates a private subnet in each Availability Zone
+resource "aws_subnet" "private_subnets" {
+  count                   = length(var.availability_zones)
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = cidrsubnet(aws_vpc.example.cidr_block, 8, count.index + 2)
+  availability_zone       = var.availability_zones[count.index]
+  map_public_ip_on_launch = false
+}
+```
+
+6. __Creation of NAT Gateways__
+
+Defines the NAT Gateway resources that will be connected to the
+private subnets for internet connectivity
+
+```
+# Create NAT Gateway 1
+resource "aws_nat_gateway" "nat-gatw1" {
+  allocation_id = aws_eip.eip1.id
+  subnet_id     = element(aws_subnet.public_subnets[*].id, 0)
+
+  tags = {
+    Name = "web_app-nat1"
+  }
+  depends_on = [aws_internet_gateway.igw]
+}
+
+# Create a NAT Gateway 2
+resource "aws_nat_gateway" "nat-gatw2" {
+  allocation_id = aws_eip.eip2.id
+  subnet_id     = element(aws_subnet.public_subnets[*].id, 1)
+
+  tags = {
+    Name = "web_app-nat2"
+  }
+  depends_on = [aws_internet_gateway.igw]
+}
+```
+
+7. 

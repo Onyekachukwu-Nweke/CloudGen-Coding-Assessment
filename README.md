@@ -113,6 +113,7 @@ and configurations of the project.
 Deep dive into the Terraform configuration files and define our AWS infrastructure.
 
 1. __Configure the Provider__
+
 In the `provider.tf` file, configure the AWS provider using your AWS credentials.
 
 ```

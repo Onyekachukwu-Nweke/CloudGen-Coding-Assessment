@@ -1,4 +1,6 @@
-# Scalable and Secure Web Application
+# AWS Scalable and Secure Web Application using Terraform
+
+This README provides a step-by-step guide on how to use Terraform to set up an AWS environment with an auto-scaling EC2 setup behind a load balancer and an RDS instance with High Availability, ensuring secure communication between them.
 
 <b>*_Objective:_*</b>
 
@@ -11,6 +13,17 @@ between them.
 
 Provide the Terraform scripts and a README file that explains the
 architecture and instructions to execute the scripts.
+
+## Table of Contents
+
+- [Prerequisites]()
+- [Assumptions]()
+- [Infrastructure Overview](#infrastructure-overview-of-our-web-application)
+- [Terraform Setup]()
+- [Terraform Configuration]()
+- [Deploying Infrastructure]()
+- [Clean Up]()
+- [Technical Trade-Offs]()
 
 ## Infrastructure Overview of our Web Application
 
@@ -37,6 +50,8 @@ The architecture we are going to set up consists of the following components:
 10. __Private Subnet:__ Private Subent is where the sensitive resources like the web app server and database servers to prevent security breach so they are not directly connected to the internet.
 
 11. __Multi-AZ Deployment:__ I made use of two availability zones to avoid single point of failure for smooth running of our web app, should there be a disaster in one of the AZs.
+
+Here is a diagram illustrating the architecture:
 
 ![Infrastructural Diagram](/img/architectural_diagram.png)
 

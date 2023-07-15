@@ -83,3 +83,26 @@ Here is a diagram illustrating the architecture:
 
 
 ## Terraform Setup
+
+1. Created a new directory on my local machine for Terraform configuration.
+```
+mkdir CloudGen-Coding-Assessment
+cd CloudGen-Coding-Assessment
+```
+
+2. Initialized a new Terraform project by running the following command:
+```
+terraform init
+```
+
+3. Created the provider terraform file (`provider.tf`) in the project directory. This file will contain
+provider specifications of the project.
+
+4. Created a network terraform file (`network.tf`) which contains all AWS network resources
+and configurations of the project.
+
+5. Created a variables file (`variables.tf`) to define any input variables needed for your infrastructure setup.
+
+6. Create an output file (`outputs.tf`) to define any outputs you want to display after the infrastructure deployment.
+
+7. Create a server teraaform file (`server.tf`) in the project directory. This file will contain the AWS web server(ec2) and database(rds) resource definitions and their configurations.

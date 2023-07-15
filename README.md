@@ -17,9 +17,9 @@ architecture and instructions to execute the scripts.
 ## Table of Contents
 
 - [Prerequisites](#prerequisites)
-- [Assumptions]()
+- [Assumptions](#assumptions)
 - [Infrastructure Overview](#infrastructure-overview-of-our-web-application)
-- [Terraform Setup]()
+- [Terraform Setup](#terraform-setup)
 - [Terraform Configuration]()
 - [Deploying Infrastructure]()
 - [Clean Up]()
@@ -81,3 +81,5 @@ Here is a diagram illustrating the architecture:
 
 ![Infrastructural Diagram](/img/architectural_diagram.png)
 
+
+## Terraform Setup

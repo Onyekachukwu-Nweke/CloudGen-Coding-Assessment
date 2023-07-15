@@ -16,7 +16,7 @@ architecture and instructions to execute the scripts.
 
 ## Table of Contents
 
-- [Prerequisites]()
+- [Prerequisites](#prerequisites)
 - [Assumptions]()
 - [Infrastructure Overview](#infrastructure-overview-of-our-web-application)
 - [Terraform Setup]()
@@ -24,6 +24,32 @@ architecture and instructions to execute the scripts.
 - [Deploying Infrastructure]()
 - [Clean Up]()
 - [Technical Trade-Offs]()
+
+## Prerequisites
+Before I began the Project, I had the following:
+
+1. An AWS account with appropriate permissions to create and manage resources.
+2. AWS CLI installed and configured with your AWS credentials.
+3. Terraform installed on your local machine.
+
+
+## Assumptions
+Based on the provided requirements, here are some technical assumptions that can be made for the project:
+
+1. **AWS Account**: It is assumed that you have a valid AWS account and the necessary credentials to access and manage AWS resources.
+
+2. **AMI Image**: The Amazon Machine Image (AMI) ID for the EC2 instances is assumed to be available. You need to provide the appropriate AMI ID in the Terraform configuration for launching the instances.
+
+3. **Key Pair**: A key pair is assumed to exist for SSH access to the EC2 instances. You need to have the private key file or its corresponding key pair name.
+
+4. **SSL Certificate**: There is no SSL certificate yet for the project.
+
+5. **Route 53 and ACM**: There is no domain name yet for the application.
+
+6. **Database**: The choice of MySQL as the database engine for the RDS instance is assumed based on the provided Terraform configuration.
+
+7. **Cost Considerations**: The provided Terraform script sets up infrastructure that may incur costs, such as EC2 instances, load balancer, and RDS instances. Cost optimization and monitoring are assumed to be the responsibility of the user.
+
 
 ## Infrastructure Overview of our Web Application
 

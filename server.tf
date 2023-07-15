@@ -18,6 +18,7 @@ resource "aws_launch_template" "cloudgen-launch_temp" {
     # security_groups = [aws_security_group.ec2_security_group.id]
   }
 
+  # User Data is used to provision our web app on the servers
   user_data = <<-EOF
                 #!/bin/bash
                 sudo apt update -y
@@ -40,4 +41,4 @@ resource "aws_launch_template" "cloudgen-launch_temp" {
   }
 }
 
-# Cre
+# Creates an AutoScaling Group that will use the launch template

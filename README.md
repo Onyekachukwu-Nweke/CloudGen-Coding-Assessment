@@ -17,13 +17,26 @@ architecture and instructions to execute the scripts.
 The architecture we are going to set up consists of the following components:
 
 1. __VPC Internet Gateway:__ AWS Internet Gateway lets a resource in your public subnets that has a public IPv4 or IPv6 address connect to the Internet. Resources on the internet can link to resources in your subnet using the accessible IPv4 or IPv6 address.
+
 2. __Load Balancer:__ An Elastic Load Balancer (ELB) that distributes incoming traffic across multiple EC2 instances.
+
 3. __Elastic IP Address:__ An Elastic IP address is a static IPv4 address designed for dynamic cloud computing. An Elastic IP address is a public IPv4 address, which is reachable from the internet. If your instance does not have a public IPv4 address, you can associate an Elastic IP address with your instance to enable communication with the internet.
+
 4. __AWS NAT Gateway:__ NAT Gateway is used to connect instances securely in the private subnet to the internet.
+
 5. __Auto Scaling Group:__ A group of EC2 instances that automatically scales based on traffic load and health status.
+
 6. __EC2 Instances:__ The web application servers that will host your web application.
+
 7. __RDS Instance:__ A highly available Relational Database Service (RDS) instance for storing application data securely and enabling its data replication feature.
+
 8. __Route Tables:__ Route Tables to control where traffic is directed.
+
+9. __Public Subnet:__ Public Subnet is for connecting the resources in the private subnet to the internet securely.
+
+10. __Private Subnet:__ Private Subent is where the sensitive resources like the web app server and database servers to prevent security breach so they are not directly connected to the internet.
+
+11. __Multi-AZ Deployment:__ I made use of two availability zones to avoid single point of failure for smooth running of our web app, should there be a disaster in one of the AZs.
 
 ![Infrastructural Diagram](/img/architectural_diagram.png)
 

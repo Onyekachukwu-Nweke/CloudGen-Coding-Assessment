@@ -43,7 +43,7 @@ variable "server_info" {
   type = object({
     image_id      = string
     instance_type = string
-    key_name      = string
+    # key_name      = string
     volume_size   = number
     device_name   = string
   })

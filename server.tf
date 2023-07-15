@@ -13,13 +13,8 @@ resource "aws_launch_template" "cloudgen-launch_temp" {
     }
   }
 
-  network_interfaces {
-    associate_public_ip_address = false
-    security_groups = [aws_security_group.cloudgen_alb_sg.id]
-  }
-
   # User Data is used to provision our web app on the servers
-  user_data = <<-EOF
+  user_data = base64encode(<<EOF
                 #!/bin/bash
                 sudo apt update -y
                 sudo apt install -y --no-install-recommends php8.1
@@ -35,7 +30,7 @@ resource "aws_launch_template" "cloudgen-launch_temp" {
                 sudo systemctl reload php8.1-fpm
                 sudo systemctl restart nginx
                 EOF
-
+  )
   tags = {
     Name = "cloudgen-launch_temp"
   }
@@ -47,7 +42,7 @@ resource "aws_autoscaling_group" "cloudgen-asg" {
   desired_capacity = 2
   min_size = 2
   max_size = 4
-  vpc_zone_identifier = [for subnet in aws_subnet.private_subnets : subnet.id]
+  vpc_zone_identifier = [for subnet in aws_subnet.public_subnets : subnet.id]
   target_group_arns = [aws_alb_target_group.cloudgen-tg.arn]
   
   launch_template {
@@ -55,13 +50,15 @@ resource "aws_autoscaling_group" "cloudgen-asg" {
     version = "$Latest"
   }
 
-   lifecycle {
+  lifecycle {
     ignore_changes = [load_balancers, target_group_arns]
   }
 
   timeouts {
     delete = "15m"
   }
+
+  depends_on = [aws_security_group.cloudgen_alb_sg]
 
   tag {
     key                 = "Name"
@@ -133,7 +130,7 @@ resource "aws_security_group" "rds" {
     from_port   = 3306
     to_port     = 3306
     protocol    = "tcp"
-    cidr_blocks = [for subnet in aws_subnet.private_subnets : subnet.cidr_block]
+    cidr_blocks = [for subnet in aws_subnet.public_subnets : subnet.cidr_block]
   }
 }
 
@@ -149,12 +146,13 @@ resource "aws_db_instance" "db_server" {
   engine               = "mysql"
   engine_version       = "8.0"
   instance_class       = "db.t2.micro"
-  db_name                 = "cloudgento_webapp"
+  db_name              = "cloudgento_webapp"
   username             = "admin"
   password             = "cloudgento2022"
   db_subnet_group_name = aws_db_subnet_group.db_subnet_group.name
   multi_az             = true
   vpc_security_group_ids = [aws_security_group.rds.id]
+  skip_final_snapshot = true
 }
 
 output "rds_endpoint" {

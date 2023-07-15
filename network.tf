@@ -44,7 +44,7 @@ resource "aws_eip" "eip2" {
 resource "aws_subnet" "public_subnets" {
   count                   = length(var.availability_zones)
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = cidrsubnet(aws_vpc.example.cidr_block, 8, count.index)
+  cidr_block              = cidrsubnet(aws_vpc.main.cidr_block, 8, count.index)
   availability_zone       = var.availability_zones[count.index]
   map_public_ip_on_launch = true
 }
@@ -53,7 +53,7 @@ resource "aws_subnet" "public_subnets" {
 resource "aws_subnet" "private_subnets" {
   count                   = length(var.availability_zones)
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = cidrsubnet(aws_vpc.example.cidr_block, 8, count.index + 2)
+  cidr_block              = cidrsubnet(aws_vpc.main.cidr_block, 8, count.index + 2)
   availability_zone       = var.availability_zones[count.index]
   map_public_ip_on_launch = false
 }

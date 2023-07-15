@@ -42,3 +42,9 @@ variable "server_info" {
     device_name   = "/dev/xvda"
   }
 }
+
+variable "inbound_ports" {
+  description = "Ports to open for ingress"
+  type    = list(number)
+  default = [80, 443]
+}

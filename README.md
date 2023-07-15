@@ -106,3 +106,75 @@ and configurations of the project.
 6. Create an output file (`outputs.tf`) to define any outputs you want to display after the infrastructure deployment.
 
 7. Create a server teraaform file (`server.tf`) in the project directory. This file will contain the AWS web server(ec2) and database(rds) resource definitions and their configurations.
+
+
+## Terraform Configuration
+
+Deep dive into the Terraform configuration files and define our AWS infrastructure.
+
+1. __Configure the Provider__
+In the `provider.tf` file, configure the AWS provider using your AWS credentials.
+
+```
+provider "aws" {
+  access_key = "${var.aws_access_key}"
+  secret_key = "${var.aws_secret_key}"
+  region = var.aws_region
+}
+```
+
+2. __Creation of VPC__
+Define a VPC resource in my `network.tf` file
+
+```
+resource "aws_vpc" "main" {
+  cidr_block = var.base_cidr_block
+  enable_dns_hostnames = true
+
+  tags = {
+    Name = var.vpc_name
+  }
+}
+```
+
+3. __Creation of Internet Gateway and attachment to VPC__
+Define a Internet Gateway resource and attached it to the VPC
+
+```
+resource "aws_internet_gateway" "internet_gw" {
+  tags = {
+    Name = var.internet_gw
+  }
+}
+
+# Internet Gateway Attachment
+resource "aws_internet_gateway_attachment" "igw-attach" {
+  internet_gateway_id = aws_internet_gateway.internet_gw.id
+  vpc_id              = aws_vpc.main.id
+}
+```
+
+4. __Creation of Elastic IP Addresses__
+Defines the Elastic IP that are situated in the public subnet
+
+```
+# Create an Elastic IP for NAT Gateway 1
+resource "aws_eip" "eip1" {
+  vpc        = true
+  depends_on = [aws_internet_gateway.igw]
+  tags = {
+    Name = "web_app-eip1"
+  }
+}
+
+# Create an Elastic IP for NAT Gateway 2
+resource "aws_eip" "eip2" {
+  vpc        = true
+  depends_on = [aws_internet_gateway.igw]
+  tags = {
+    Name = "web_app-eip2"
+  }
+}
+```
+
+5. __Creation of NAT Gateways__

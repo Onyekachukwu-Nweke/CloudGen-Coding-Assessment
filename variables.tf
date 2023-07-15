@@ -6,16 +6,30 @@ variable "base_cidr_block" {
   default     = "10.0.0.0/16"
 }
 
+variable "aws_region" {
+  type = string
+  description = "This defines the deployment region"
+  default     = "us-east-1"
+}
+
+variable "aws_access_key" {
+  type = string
+}
+
+variable "aws_secret_key" {
+  type = string
+}
+
 variable "vpc_name" {
   description = "Denotes the name of the VPC wherever specified"
   type = string
-  default = "main-web_app-vpc"
+  default = "main-cloudgen-vpc"
 }
 
 variable "internet_gw" {
   type        = string
   description = "Name of your internet gateway"
-  default     = "main-web_app-igw"
+  default     = "main-cloudgen-igw"
 }
 
 variable "availability_zones" {
@@ -37,7 +51,7 @@ variable "server_info" {
   default = {
     image_id      = "ami-06878d265978313ca"
     instance_type = "t2.micro"
-    key_name      = "cloudgen-1"
+    # key_name      = "cloudgen-1"
     volume_size   = 10
     device_name   = "/dev/xvda"
   }

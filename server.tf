@@ -3,7 +3,7 @@ resource "aws_launch_template" "cloudgen-launch_temp" {
   name          = "cloudgen-launch_temp"
   image_id      = var.server_info.image_id
   instance_type = var.server_info.instance_type
-  key_name      = var.server_info.key_name
+  # key_name      = var.server_info.key_name
   vpc_security_group_ids = [aws_security_group.cloudgen_alb_sg.id]
 
   block_device_mappings {
@@ -120,37 +120,47 @@ resource "aws_alb_target_group" "cloudgen-tg" {
     timeout             = 3
     unhealthy_threshold = 2
   }
-
 }
 
-resource "aws_alb_listener" "new_listener" {
-  load_balancer_arn = aws_alb.new_alb.arn
-  port              = "443"
-  protocol          = "HTTPS"
-  ssl_policy        = "ELBSecurityPolicy-2016-08"
-  certificate_arn   = var.arn
-  default_action {
-    target_group_arn = aws_alb_target_group.cloudgen-tg.arn
-    type             = "forward"
+# Creation of RDS security group
+resource "aws_security_group" "rds" {
+  name        = "rds_sg"
+  description = "RDS security group"
+
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
+    cidr_blocks = [for subnet in aws_subnet.private_subnets : subnet.cidr_block]
   }
 }
 
-resource "aws_alb_listener" "http_to_https" {
-  load_balancer_arn = aws_alb.cloudgen-alb.arn
-  port              = "80"
-  protocol          = "HTTP"
-  default_action {
-    target_group_arn = aws_alb_target_group.cloudgen-tg.arn
-    type             = "redirect"
+# Creates a DB Subnet group
+resource "aws_db_subnet_group" "db_subnet_group" {
+  name       = "db_subnet_group"
+  subnet_ids = [for subnet in aws_subnet.private_subnets : subnet.id]
+}
 
-    redirect {
-      port = "443"
-      protocol = "HTTPS"
-      status_code = "HTTP_301"
-    }
-  }
+# Creates a RDS instance
+resource "aws_db_instance" "db_server" {
+  allocated_storage    = 20
+  engine               = "mysql"
+  engine_version       = "8.0"
+  instance_class       = "db.t2.micro"
+  db_name                 = "cloudgento_webapp"
+  username             = "admin"
+  password             = "cloudgento2022"
+  db_subnet_group_name = aws_db_subnet_group.db_subnet_group.name
+  multi_az             = true
+  vpc_security_group_ids = [aws_security_group.rds.id]
+}
+
+output "rds_endpoint" {
+  value = aws_db_instance.db_server.endpoint
 }
 
 output "alb_dns_name" {
-  value = aws_alb.cloudgen-alb.dns_name
+  value = aws_alb.new_alb.dns_name
 }

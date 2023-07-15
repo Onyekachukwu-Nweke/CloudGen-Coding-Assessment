@@ -25,7 +25,7 @@ resource "aws_internet_gateway_attachment" "igw-attach" {
 # Create an Elastic IP for NAT Gateway 1
 resource "aws_eip" "eip1" {
   vpc        = true
-  depends_on = [aws_internet_gateway.igw]
+  depends_on = [aws_internet_gateway.internet_gw]
   tags = {
     Name = "web_app-eip1"
   }
@@ -34,7 +34,7 @@ resource "aws_eip" "eip1" {
 # Create an Elastic IP for NAT Gateway 2
 resource "aws_eip" "eip2" {
   vpc        = true
-  depends_on = [aws_internet_gateway.igw]
+  depends_on = [aws_internet_gateway.internet_gw]
   tags = {
     Name = "web_app-eip2"
   }

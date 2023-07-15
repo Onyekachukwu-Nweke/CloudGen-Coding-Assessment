@@ -27,7 +27,7 @@ resource "aws_eip" "eip1" {
   vpc        = true
   depends_on = [aws_internet_gateway.internet_gw]
   tags = {
-    Name = "web_app-eip1"
+    Name = "cloudgen-eip1"
   }
 }
 
@@ -36,7 +36,7 @@ resource "aws_eip" "eip2" {
   vpc        = true
   depends_on = [aws_internet_gateway.internet_gw]
   tags = {
-    Name = "web_app-eip2"
+    Name = "cloudgen-eip2"
   }
 }
 
@@ -64,7 +64,7 @@ resource "aws_nat_gateway" "nat-gatw1" {
   subnet_id     = element(aws_subnet.public_subnets[*].id, 0)
 
   tags = {
-    Name = "web_app-nat1"
+    Name = "cloudgen-nat1"
   }
   depends_on = [aws_internet_gateway.igw]
 }
@@ -75,7 +75,7 @@ resource "aws_nat_gateway" "nat-gatw2" {
   subnet_id     = element(aws_subnet.public_subnets[*].id, 1)
 
   tags = {
-    Name = "web_app-nat2"
+    Name = "cloudgen-nat2"
   }
   depends_on = [aws_internet_gateway.igw]
 }
@@ -86,11 +86,11 @@ resource "aws_route_table" "pub-rt" {
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw.id
+    gateway_id = aws_internet_gateway.internet_gw.id
   }
 
   tags = {
-    Name = "web_app-pub-rt"
+    Name = "cloudgen-pub-rt"
   }
 }
 
@@ -104,7 +104,7 @@ resource "aws_route_table" "priv-rt1" {
   }
 
   tags = {
-    Name = "web_app-priv-rt1"
+    Name = "cloudgen-priv-rt1"
   }
 }
 
@@ -117,7 +117,7 @@ resource "aws_route_table" "priv-rt2" {
   }
 
   tags = {
-    Name = "web_app-priv-rt2"
+    Name = "cloudgen-priv-rt2"
   }
 }
 

@@ -162,5 +162,5 @@ output "rds_endpoint" {
 }
 
 output "alb_dns_name" {
-  value = aws_alb.new_alb.dns_name
+  value = aws_alb.cloudgen-alb.dns_name
 }

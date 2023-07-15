@@ -124,6 +124,7 @@ provider "aws" {
 ```
 
 2. __Creation of VPC__
+
 Define a VPC resource in my `network.tf` file
 
 ```
@@ -138,6 +139,7 @@ resource "aws_vpc" "main" {
 ```
 
 3. __Creation of Internet Gateway and attachment to VPC__
+
 Define a Internet Gateway resource and attached it to the VPC
 
 ```
@@ -155,6 +157,7 @@ resource "aws_internet_gateway_attachment" "igw-attach" {
 ```
 
 4. __Creation of Elastic IP Addresses__
+
 Defines the Elastic IP that are situated in the public subnet
 
 ```

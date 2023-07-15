@@ -80,18 +80,62 @@ resource "aws_nat_gateway" "nat-gatw2" {
   depends_on = [aws_internet_gateway.igw]
 }
 
-# Creates private route table for private subnet 1
-resource "aws_route_table" "priv-rt-1" {
-  vpc_id = aws_vpc.main.id
-}
-
-# Creates private route table for private subnet 2
-resource "aws_route_table" "priv-rt-2" {
-  vpc_id = aws_vpc.main.id
-}
-
-# Creates public route table for the public subnet 1 and 2
+# Create Route Table for public sub 1 and 2
 resource "aws_route_table" "pub-rt" {
   vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
+
+  tags = {
+    Name = "web_app-pub-rt"
+  }
+}
+
+# Create Route Table for private sub 1
+resource "aws_route_table" "priv-rt1" {
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat-gatw1.id
+  }
+
+  tags = {
+    Name = "web_app-priv-rt1"
+  }
+}
+
+# Create Route Table for private sub 2
+resource "aws_route_table" "priv-rt2" {
+  vpc_id = aws_vpc.main.id
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat-gatw2.id
+  }
+
+  tags = {
+    Name = "web_app-priv-rt2"
+  }
+}
+
+# Associate public subnet 2 with public route table
+resource "aws_route_table_association" "pub-sub2-association" {
+  subnet_id      = aws_subnet.pub-sub2.id
+  route_table_id = aws_route_table.pub-rt.id
+}
+
+# Associate private subnet 1 with private route table 1
+resource "aws_route_table_association" "priv-sub1-association" {
+  subnet_id      = aws_subnet.priv-sub1.id
+  route_table_id = aws_route_table.priv-rt1.id
+}
+
+# Associate private subnet 2 with private route table 2
+resource "aws_route_table_association" "priv-sub2-association" {
+  subnet_id      = aws_subnet.priv-sub2.id
+  route_table_id = aws_route_table.priv-rt2.id
 }
 

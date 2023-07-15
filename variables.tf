@@ -23,3 +23,22 @@ variable "availability_zones" {
   type    = list(string)
   default = ["us-east-1a", "us-east-1b"]  # Replace with your desired AZs
 }
+
+variable "server_info" {
+  description = "Describes everything about the EC2 instance to be created"
+  type = object({
+    image_id      = string
+    instance_type = string
+    key_name      = string
+    volume_size   = number
+    device_name   = string
+  })
+
+  default = {
+    image_id      = "ami-06878d265978313ca"
+    instance_type = "t2.micro"
+    key_name      = "cloudgen-1"
+    volume_size   = 10
+    device_name   = "/dev/xvda"
+  }
+}

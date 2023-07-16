@@ -142,8 +142,8 @@ resource "aws_db_instance" "db_server" {
   engine_version       = "8.0"
   instance_class       = "db.t2.micro"
   db_name              = var.database_name
-  username             = "admin"
-  password             = "cloudgento2022"
+  username             = var.database_user
+  password             = var.database_password
   db_subnet_group_name = aws_db_subnet_group.db_subnet_group.name
   multi_az             = true
   vpc_security_group_ids = [aws_security_group.rds.id]
@@ -154,10 +154,10 @@ resource "aws_db_instance" "db_server" {
   }
 }
 
-output "rds_endpoint" {
-  value = aws_db_instance.db_server.endpoint
-}
+# output "rds_endpoint" {
+#   value = aws_db_instance.db_server.endpoint
+# }
 
-output "alb_dns_name" {
-  value = aws_alb.cloudgen-alb.dns_name
-}
+# output "alb_dns_name" {
+#   value = aws_alb.cloudgen-alb.dns_name
+# }

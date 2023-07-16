@@ -72,11 +72,11 @@ variable "database_name" {
 variable "database_user" {
   description = "Value of the database user"
   type        = string
-  default     = "testdb"
+  default     = "admin"
 }
 
 variable "database_password" {
   description = "Value of the database password"
   type        = string
-  default     = "welcome123"
+  default     = "cloudgento2022"
 }

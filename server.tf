@@ -14,23 +14,7 @@ resource "aws_launch_template" "cloudgen-launch_temp" {
   }
 
   # User Data is used to provision our web app on the servers
-  user_data = base64encode(<<EOF
-                #!/bin/bash
-                sudo apt update -y
-                sudo apt install -y --no-install-recommends php8.1
-                sudo apt-get install -y php8.1-cli php8.1-common php8.1-mysql php8.1-zip php8.1-gd php8.1-mbstring php8.1-curl php8.1-xml php8.1-bcmath php8.1-fpm
-                sudo systemctl reload php8.1-fpm
-                git clone https://github.com/Onyekachukwu-Nweke/server_stats_template.git
-                sudo apt install -y nginx
-                sudo mv server_stats_template/assets /var/www/html/
-                sudo mv server_stats_template/index.php /var/www/html/
-                git clone https://github.com/Onyekachukwu-Nweke/Alt-School-Sem3-Holiday-Project.git
-                sudo cat Alt-School-Sem3-Holiday-Project/nginx | sudo tee /etc/nginx/sites-available/default
-                sudo mv /var/www/html/index.nginx-debian.html ../
-                sudo systemctl reload php8.1-fpm
-                sudo systemctl restart nginx
-                EOF
-  )
+  user_data = templatefile("user_data.tfpl", { rds_endpoint = "${aws_db_instance.rds.endpoint}", user  = var.database_user , password = var.database_password , dbname = var.database_name })
   tags = {
     Name = "cloudgen-launch_temp"
   }
@@ -119,6 +103,17 @@ resource "aws_alb_target_group" "cloudgen-tg" {
   }
 }
 
+resource "aws_alb_listener" "listener_http" {
+  load_balancer_arn = "${aws_alb.cloudgen-alb.arn}"
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    target_group_arn = "${aws_alb_target_group.cloudgen-tg.arn}"
+    type             = "forward"
+  }
+}
+
 # Creation of RDS security group
 resource "aws_security_group" "rds" {
   name        = "rds_sg"
@@ -146,13 +141,17 @@ resource "aws_db_instance" "db_server" {
   engine               = "mysql"
   engine_version       = "8.0"
   instance_class       = "db.t2.micro"
-  db_name              = "cloudgento_webapp"
+  db_name              = var.database_name
   username             = "admin"
   password             = "cloudgento2022"
   db_subnet_group_name = aws_db_subnet_group.db_subnet_group.name
   multi_az             = true
   vpc_security_group_ids = [aws_security_group.rds.id]
   skip_final_snapshot = true
+
+  tags = {
+    Name = "CloudGen-RDS-MYSQL"
+  }
 }
 
 output "rds_endpoint" {

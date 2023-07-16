@@ -1,0 +1,22 @@
+#!/bin/bash
+sudo apt update -y
+sudo apt install -y --no-install-recommends php8.1
+sudo apt-get install -y php8.1-cli php8.1-common php8.1-mysql php8.1-zip php8.1-gd php8.1-mbstring php8.1-curl php8.1-xml php8.1-bcmath php8.1-fpm
+sudo systemctl reload php8.1-fpm
+cd /var/www
+mkdir inc
+cd inc
+echo "<?php
+define('DB_SERVER', '${rds_endpoint}');
+define('DB_USERNAME', '${user}');
+define('DB_PASSWORD', '${password}');
+define('DB_DATABASE', '${dbname}');
+?>" > dbinfo.inc
+
+git clone https://github.com/Onyekachukwu-Nweke/CloudGen-Coding-Assessment.git
+sudo apt install -y nginx
+sudo mv CloudGen-Coding-Assessment/index.php /var/www/html/
+sudo cat CloudGen-Coding-Assessment/nginx | sudo tee /etc/nginx/sites-available/default
+sudo mv /var/www/html/index.nginx-debian.html ../
+sudo systemctl reload php8.1-fpm
+sudo systemctl restart nginx

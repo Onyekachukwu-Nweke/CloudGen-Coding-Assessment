@@ -49,10 +49,10 @@ variable "server_info" {
   })
 
   default = {
-    image_id      = "ami-06878d265978313ca"
+    image_id      = "ami-053b0d53c279acc90"
     instance_type = "t2.micro"
     # key_name      = "cloudgen-1"
-    volume_size   = 10
+    volume_size   = 20
     device_name   = "/dev/xvda"
   }
 }
@@ -60,5 +60,23 @@ variable "server_info" {
 variable "inbound_ports" {
   description = "Ports to open for ingress"
   type    = list(number)
-  default = [80, 443]
+  default = [80, 443, 22]
+}
+
+variable "database_name" {
+  description = "Value of the database name"
+  type        = string
+  default     = "cloudgento_webapp"
+}
+
+variable "database_user" {
+  description = "Value of the database user"
+  type        = string
+  default     = "testdb"
+}
+
+variable "database_password" {
+  description = "Value of the database password"
+  type        = string
+  default     = "welcome123"
 }

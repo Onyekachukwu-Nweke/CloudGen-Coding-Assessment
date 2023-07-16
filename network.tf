@@ -95,30 +95,32 @@ resource "aws_route_table" "pub-rt" {
 }
 
 # Create Route Table for private sub 1
-resource "aws_route_table" "priv-rt1" {
-  vpc_id = aws_vpc.main.id
+# resource "aws_route_table" "priv-rt1" {
+#   vpc_id = aws_vpc.main.id
 
-  route {
-    cidr_block     = "0.0.0.0/0"
-    # nat_gateway_id = aws_nat_gateway.nat-gatw1.id
-  }
+#   route {
+#     cidr_block     = "0.0.0.0/0"
+#     # nat_gateway_id = aws_nat_gateway.nat-gatw1.id
+#     gateway_id = aws_internet_gateway.internet_gw.id
+#   }
 
-  tags = {
-    Name = "cloudgen-priv-rt1"
-  }
-}
+#   tags = {
+#     Name = "cloudgen-priv-rt1"
+#   }
+# }
 
 # Create Route Table for private sub 2
-resource "aws_route_table" "priv-rt2" {
-  vpc_id = aws_vpc.main.id
-  route {
-    cidr_block     = "0.0.0.0/0"
-  }
+# resource "aws_route_table" "priv-rt2" {
+#   vpc_id = aws_vpc.main.id
+#   route {
+#     cidr_block     = "0.0.0.0/0"
+#     gateway_id = aws_internet_gateway.internet_gw.id
+#   }
 
-  tags = {
-    Name = "cloudgen-priv-rt2"
-  }
-}
+#   tags = {
+#     Name = "cloudgen-priv-rt2"
+#   }
+# }
 
 # Associate public subnet 1 with public route table 1
 resource "aws_route_table_association" "pub-sub1-association" {
@@ -134,14 +136,14 @@ resource "aws_route_table_association" "pub-sub2-association" {
 
 
 # Associate private subnet 1 with private route table 1
-resource "aws_route_table_association" "priv-sub1-association" {
-  subnet_id      = aws_subnet.private_subnets[0].id
-  route_table_id = aws_route_table.priv-rt1.id
-}
+# resource "aws_route_table_association" "priv-sub1-association" {
+#   subnet_id      = aws_subnet.private_subnets[0].id
+#   route_table_id = aws_route_table.priv-rt1.id
+# }
 
-# Associate private subnet 2 with private route table 2
-resource "aws_route_table_association" "priv-sub2-association" {
-  subnet_id      = aws_subnet.private_subnets[1].id
-  route_table_id = aws_route_table.priv-rt2.id
-}
+# # Associate private subnet 2 with private route table 2
+# resource "aws_route_table_association" "priv-sub2-association" {
+#   subnet_id      = aws_subnet.private_subnets[1].id
+#   route_table_id = aws_route_table.priv-rt2.id
+# }
 

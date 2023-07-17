@@ -25,6 +25,7 @@ architecture and instructions to execute the scripts.
   - [Terraform Configuration](#terraform-configuration)
   - [Deploying the Infrastructure](#deploying-the-infrastructure)
   - [Cleanup](#cleanup)
+  - [Challenges Faced on the Project](#challenges-faced-on-the-project)
   - [Technical Trade-offs](#technical-trade-offs)
 
 
@@ -37,13 +38,13 @@ Before I began the Project, I had the following:
 
 
 ## Assumptions
-Based on the provided requirements, here are some technical assumptions that can be made for the project:
+Based on the provided requirements, here are some technical assumptions that Imade for the project:
 
 1. **AWS Account**: It is assumed that you have a valid AWS account and the necessary credentials to access and manage AWS resources.
 
 2. **AMI Image**: The Amazon Machine Image (AMI) ID for the EC2 instances is assumed to be available. You need to provide the appropriate AMI ID in the Terraform configuration for launching the instances.
 
-3. **Key Pair**: A key pair is assumed to exist for SSH access to the EC2 instances. You need to have the private key file or its corresponding key pair name.
+3. **Key Pair**: A key pair is assumed not to exist for SSH access to the EC2 instances. It can only be connected through the console for security reasons.
 
 4. **SSL Certificate**: There is no SSL certificate yet for the project.
 
@@ -51,18 +52,18 @@ Based on the provided requirements, here are some technical assumptions that can
 
 6. **Database**: The choice of MySQL as the database engine for the RDS instance is assumed based on the provided Terraform configuration.
 
-7. **Cost Considerations**: The provided Terraform script sets up infrastructure that may incur costs, such as EC2 instances, load balancer, and RDS instances. Cost optimization and monitoring are assumed to be the responsibility of the user.
+7. **Cost Considerations**: The provided Terraform script sets up infrastructure that may incur costs, such as EC2 instances, load balancer, elastic ip, nat gateways and RDS instances. Cost optimization and monitoring are assumed to be the responsibility of the user.
 
 
 ## Infrastructure Overview of our Web Application
 
 The architecture we are going to set up consists of the following components:
 
-1. __VPC Internet Gateway:__ AWS Internet Gateway lets a resource in your public subnets that has a public IPv4 or IPv6 address connect to the Internet. Resources on the internet can link to resources in your subnet using the accessible IPv4 or IPv6 address.
+1. __VPC Internet Gateway:__ AWS Internet Gateway lets a resource in your public subnets that has a public IP address connect to the Internet. Resources on the internet can link to resources in your subnet using the accessible IP address.
 
-2. __Load Balancer:__ An Elastic Load Balancer (ELB) that distributes incoming traffic across multiple EC2 instances.
+2. __Load Balancer:__ An Elastic Load Balancer (ELB) that distributes incoming traffic across multiple EC2 instances in different subnets.
 
-3. __Elastic IP Address:__ An Elastic IP address is a static IPv4 address designed for dynamic cloud computing. An Elastic IP address is a public IPv4 address, which is reachable from the internet. If your instance does not have a public IPv4 address, you can associate an Elastic IP address with your instance to enable communication with the internet.
+3. __Elastic IP Address:__ An Elastic IP address is used to connect to NAT gateways due to instability and enable them to connect to the internet in this infrastructure.
 
 4. __AWS NAT Gateway:__ NAT Gateway is used to connect instances securely in the private subnet to the internet.
 
@@ -118,7 +119,7 @@ and configurations of the project.
 
 10. `index.php` file contains the web application we are provisioning for the project.
 
-11. `userdata.tfpl` file is a user data script that will be used to configure the launch template that the Auto Scaling Group will use.
+11. `userdata.tfpl` template file is a user data script that will be used to configure the launch template that the Auto Scaling Group will use.
 
 
 ## Terraform Configuration
@@ -620,9 +621,23 @@ terraform destroy -var-file=secret.tfvars
 ```
 Confirm the action by typing "yes" when prompted.
 
+## Challenges Faced on the Project
+
+Here are some challenges I faced when building this infrastructure:
+
+1. **Infrastructure Complexity:** Setting up an auto-scaling EC2 setup with a load balancer, combined with a highly available RDS instance, can introduce complexity in terms of configuration, networking, and coordination between different components.
+
+2. **Networking and Security Considerations:** Ensuring secure communication between the EC2 instances and the RDS instance requires proper networking configurations, security groups, and encryption protocols. Handling network connectivity, firewall rules, and secure data transfer can be complex, and misconfigurations can lead to communication failures or security vulnerabilities.
+
+3. **Resource Provisioning and Dependencies:** Coordinating the provisioning of EC2 instances, load balancers, and the RDS instance with high availability requires careful consideration of dependencies and proper sequencing. Ensuring that all components are created and configured correctly while managing dependencies and potential race conditions can be challenging.
+
+4. **Cost Optimization:** Achieving the desired scalability and high availability can come with additional costs, such as increased EC2 instances, load balancer usage, elastic ip, nat gateways and RDS instance replication. Balancing performance and redundancy requirements with cost efficiency and optimizing resource allocation can be a challenge, especially when dealing with fluctuating application traffic.
+
+5. **Integration and Application Compatibility:** Ensuring that the web application is compatible with the auto-scaling setup, load balancer, and RDS instance, including any required database modifications or application configurations, I had to specify the Database engine needed.
+
 ## Technical Trade-offs
 
-Here are some technical trade-offs to consider when building this infrastructure:
+Here are some technical trade-offs, I considered when building this infrastructure:
 
 1. **Scalability vs. Cost:** Implementing an auto-scaling EC2 setup behind a load balancer allows for improved scalability and handling of increased traffic. However, scaling infrastructure can come with additional costs, especially if the application experiences frequent spikes in usage. It's crucial to strike a balance between scalability requirements and cost constraints.
 
@@ -635,3 +650,6 @@ Here are some technical trade-offs to consider when building this infrastructure
 5. **Vendor Lock-in vs. Flexibility:** Leveraging AWS services offers scalability and managed solutions. However, relying heavily on AWS services may result in vendor lock-in, limiting the ability to switch to alternative cloud providers in the future. Balancing the advantages of using AWS services with the desire for flexibility and avoiding excessive vendor dependencies is important.
 
 6. **Complexity vs. Maintenance:** The use of advanced AWS services, such as auto-scaling, load balancers, and RDS with high availability, can introduce increased complexity in terms of configuration and maintenance. Assessing the trade-off between the complexity of the chosen architecture and the team's ability to effectively manage and maintain it is crucial.
+
+**Evidence Of Deployed Web App**
+![web app](/img/webapp.png)

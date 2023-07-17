@@ -23,6 +23,10 @@ architecture and instructions to execute the scripts.
   - [Infrastructure Overview of our Web Application](#infrastructure-overview-of-our-web-application)
   - [Terraform Setup](#terraform-setup)
   - [Terraform Configuration](#terraform-configuration)
+  - [Deploying the Infrastructure](#deploying-the-infrastructure)
+  - [Cleanup](#cleanup)
+  - [Technical Trade-offs](#technical-trade-offs)
+
 
 ## Prerequisites
 Before I began the Project, I had the following:
@@ -565,3 +569,67 @@ resource "aws_db_instance" "db_server" {
 
 **Evidence of RDS creation**
 ![rds](/img/rds_act.png)
+
+14. __Outputs__
+
+Displays useful information about some infrastructure deployed, they are contained in the `outputs.tf` file.
+
+```
+output "rds_endpoint" {
+  value = aws_db_instance.db_server.endpoint
+}
+
+output "alb_dns_name" {
+  value = aws_alb.cloudgen-alb.dns_name
+}
+```
+
+## Deploying the Infrastructure
+
+1. After setting up the Terraform configuration files, run the following command to validate your configuration.
+
+```
+terraform validate
+```
+Make sure there are no errors.
+
+2. Run the Terraform plan command to see the execution plan without making any changes.
+
+```
+terraform plan -var-file=secret.tfvars
+```
+The `secret.tfvars` file should contain aws access key and aws secret key
+Review the output to ensure all the resources and configurations are as expected.
+
+3. If the plan looks correct, apply the Terraform changes to create the infrastructure.
+
+```
+terraform apply -var-file=secret.tfvars
+```
+Confirm the action by typing "yes" when prompted.
+
+4. Terraform will now create the AWS resources defined in your configuration files. This process may take several minutes.
+
+5. Once the deployment is complete, you can access your web application using the load balancer DNS name.
+
+## Cleanup
+
+To destroy the created AWS resources and clean up your environment, run the following command:
+```
+terraform destroy -var-file=secret.tfvars
+```
+Confirm the action by typing "yes" when prompted.
+
+## Technical Trade-offs
+
+Here are some technical trade-offs to consider when building this infrastructure:
+
+1. Cost: The auto-scaling EC2 instances and RDS instance can incur ongoing costs. Monitor and manage your resource usage to optimize costs.
+
+2. Database Scalability: The RDS instance provides high availability, but scaling the database may require additional configuration or moving to a different database solution like Amazon Aurora.
+
+3. Maintenance: You will be responsible for managing and maintaining the EC2 instances, load balancer, and RDS instance. Ensure you have processes in place for regular updates, backups, and monitoring.
+
+4. Network Configuration: This setup assumes you have a VPC already configured. If you don't have a VPC, additional setup steps will be required.
+
+5. Security: Ensure that proper security measures are in place, such as using encrypted storage for RDS and SSL certificates for secure communication between clients and the load balancer.

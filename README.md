@@ -239,7 +239,7 @@ resource "aws_subnet" "private_subnets" {
 6. __Creation of NAT Gateways__
 
 Defines the NAT Gateway resources that will be connected to the
-private subnets for internet connectivity
+private subnets for internet connectivity.
 
 ```
 # Create NAT Gateway 1
@@ -248,9 +248,9 @@ resource "aws_nat_gateway" "nat-gatw1" {
   subnet_id     = element(aws_subnet.public_subnets[*].id, 0)
 
   tags = {
-    Name = "web_app-nat1"
+    Name = "cloudgen-nat1"
   }
-  depends_on = [aws_internet_gateway.igw]
+  depends_on = [aws_internet_gateway.internet_gw]
 }
 
 # Create a NAT Gateway 2
@@ -259,11 +259,14 @@ resource "aws_nat_gateway" "nat-gatw2" {
   subnet_id     = element(aws_subnet.public_subnets[*].id, 1)
 
   tags = {
-    Name = "web_app-nat2"
+    Name = "cloudgen-nat2"
   }
-  depends_on = [aws_internet_gateway.igw]
+  depends_on = [aws_internet_gateway.internet_gw]
 }
 ```
+
+**Evidence of Creation of NAT Gateways**
+![nat gateway](/img/nat.png)
 
 7. __Creation of Route Table and Association of Route Tables__
 
@@ -277,11 +280,11 @@ resource "aws_route_table" "pub-rt" {
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw.id
+    gateway_id = aws_internet_gateway.internet_gw.id
   }
 
   tags = {
-    Name = "web_app-pub-rt"
+    Name = "cloudgen-pub-rt"
   }
 }
 
@@ -295,7 +298,7 @@ resource "aws_route_table" "priv-rt1" {
   }
 
   tags = {
-    Name = "web_app-priv-rt1"
+    Name = "cloudgen-priv-rt1"
   }
 }
 
@@ -308,28 +311,38 @@ resource "aws_route_table" "priv-rt2" {
   }
 
   tags = {
-    Name = "web_app-priv-rt2"
+    Name = "cloudgen-priv-rt2"
   }
 }
 
-# Associate public subnet 2 with public route table
-resource "aws_route_table_association" "pub-sub2-association" {
-  subnet_id      = aws_subnet.pub-sub2.id
+# Associate public subnet 1 with public route table 1
+resource "aws_route_table_association" "pub-sub1-association" {
+  subnet_id      = aws_subnet.public_subnets[0].id
   route_table_id = aws_route_table.pub-rt.id
 }
 
+# Associate public subnet 2 with public route table 1
+resource "aws_route_table_association" "pub-sub2-association" {
+  subnet_id      = aws_subnet.public_subnets[1].id
+  route_table_id = aws_route_table.pub-rt.id
+}
+
+
 # Associate private subnet 1 with private route table 1
 resource "aws_route_table_association" "priv-sub1-association" {
-  subnet_id      = aws_subnet.priv-sub1.id
+  subnet_id      = aws_subnet.private_subnets[0].id
   route_table_id = aws_route_table.priv-rt1.id
 }
 
 # Associate private subnet 2 with private route table 2
 resource "aws_route_table_association" "priv-sub2-association" {
-  subnet_id      = aws_subnet.priv-sub2.id
+  subnet_id      = aws_subnet.private_subnets[1].id
   route_table_id = aws_route_table.priv-rt2.id
 }
 ```
+
+**Evidence of Route Table Creation**
+![rtb](/img/route.png)
 
 8. __Creation of Launch Template__
 

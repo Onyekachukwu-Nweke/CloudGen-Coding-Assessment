@@ -624,12 +624,14 @@ Confirm the action by typing "yes" when prompted.
 
 Here are some technical trade-offs to consider when building this infrastructure:
 
-1. Cost: The auto-scaling EC2 instances and RDS instance can incur ongoing costs. Monitor and manage your resource usage to optimize costs.
+1. **Scalability vs. Cost:** Implementing an auto-scaling EC2 setup behind a load balancer allows for improved scalability and handling of increased traffic. However, scaling infrastructure can come with additional costs, especially if the application experiences frequent spikes in usage. It's crucial to strike a balance between scalability requirements and cost constraints.
 
-2. Database Scalability: The RDS instance provides high availability, but scaling the database may require additional configuration or moving to a different database solution like Amazon Aurora.
+2. **High Availability vs. Complexity:** Setting up an RDS instance with high availability ensures better resilience against failures. However, achieving high availability often involves more complex configurations, such as multi-AZ deployments and failover mechanisms. Balancing the desired level of availability with the complexity of setup and maintenance is important.
 
-3. Maintenance: You will be responsible for managing and maintaining the EC2 instances, load balancer, and RDS instance. Ensure you have processes in place for regular updates, backups, and monitoring.
+3. **Secure Communication vs. Performance:** Ensuring secure communication between the EC2 instances and the RDS instance adds an extra layer of security. However, implementing encryption and secure communication protocols can introduce additional processing overhead, potentially impacting overall system performance. Finding the right balance between security and performance is crucial.
 
-4. Network Configuration: This setup assumes you have a VPC already configured. If you don't have a VPC, additional setup steps will be required.
+4. **Infrastructure as Code (IaC) vs. Development Speed:** Using Terraform for infrastructure provisioning and configuration brings benefits like reproducibility, version control, and automation. However, adopting IaC practices may require additional time and effort to set up and maintain infrastructure code. Evaluating the trade-off between development speed and the long-term benefits of IaC is necessary.
 
-5. Security: Ensure that proper security measures are in place, such as using encrypted storage for RDS and SSL certificates for secure communication between clients and the load balancer.
+5. **Vendor Lock-in vs. Flexibility:** Leveraging AWS services offers scalability and managed solutions. However, relying heavily on AWS services may result in vendor lock-in, limiting the ability to switch to alternative cloud providers in the future. Balancing the advantages of using AWS services with the desire for flexibility and avoiding excessive vendor dependencies is important.
+
+6. **Complexity vs. Maintenance:** The use of advanced AWS services, such as auto-scaling, load balancers, and RDS with high availability, can introduce increased complexity in terms of configuration and maintenance. Assessing the trade-off between the complexity of the chosen architecture and the team's ability to effectively manage and maintain it is crucial.

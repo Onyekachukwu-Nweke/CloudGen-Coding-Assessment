@@ -26,7 +26,7 @@ resource "aws_autoscaling_group" "cloudgen-asg" {
   desired_capacity = 2
   min_size = 2
   max_size = 4
-  vpc_zone_identifier = [for subnet in aws_subnet.public_subnets : subnet.id]
+  vpc_zone_identifier = [for subnet in aws_subnet.private_subnets : subnet.id]
   target_group_arns = [aws_alb_target_group.cloudgen-tg.arn]
   
   launch_template {

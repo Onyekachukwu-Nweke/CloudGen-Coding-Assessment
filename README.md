@@ -380,7 +380,7 @@ resource "aws_launch_template" "cloudgen-launch_temp" {
 
 9. __Creation of Auto Scaling Group__
 
-Defines the creation auto scaling in each private subnet specified.
+Defines the creation auto scaling group which creates an EC2 instance in each private subnet specified.
 
 ```
 # Creates an AutoScaling Group that will use the launch template
@@ -415,5 +415,153 @@ resource "aws_autoscaling_group" "cloudgen-asg" {
 }
 ```
 
-**Evidence of Auto Scaling Group Creation**
+**Evidence of Auto Scaling Group and EC2 Creation**
 ![asg](/img/asg.png)
+![ec2](/img/ec2.png)
+
+10. __Creation of EC2 and RDS Security Group__
+
+Defines the ec2 security group which will be attached to the ec2 instances that are created by the autoscaling group and also the RDS security group that allows access to the EC2 instances to write to the RDS server
+```
+# Creation of EC2 instance / Load balancer security group
+resource "aws_security_group" "cloudgen_alb_sg" {
+  name        = "cloudgen_alb_sg"
+  description = "Allow TLS inbound traffic"
+
+  vpc_id = aws_vpc.main.id
+
+  dynamic "ingress" {
+    for_each = var.inbound_ports
+    content {
+      from_port   = ingress.value
+      to_port     = ingress.value
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# Creation of RDS security group
+resource "aws_security_group" "rds_sg" {
+  name        = "rds_sg"
+  description = "RDS security group"
+
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    description = "ssh"
+    security_groups= [aws_security_group.cloudgen_alb_sg.id]
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [for subnet in aws_subnet.private_subnets : subnet.cidr_block]
+  }
+
+  ingress {
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
+    security_groups= [aws_security_group.cloudgen_alb_sg.id]
+    cidr_blocks = [for subnet in aws_subnet.private_subnets : subnet.cidr_block]
+  }
+}
+```
+
+**Evidence of Security Group Creation**
+![sg](/img/sg.png)
+
+11. __Creation of Load Balancer and Target Groups__
+
+Defines the creation of Application internet facing load balancer that route traffic to the servers in a balanced way, but Load balancers cannot do this without having a target group which contains a list of servers/instances that traffic can be routed to and also the listeners which port they are send and pick up traffic from.
+
+```
+# Creates the AWS Application Load Balancer(ALB)
+resource "aws_alb" "cloudgen-alb" {
+  name               = "cloudgen-alb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.cloudgen_alb_sg.id]
+  subnets = aws_subnet.public_subnets.*.id
+}
+
+# Creates an ALB target group
+resource "aws_alb_target_group" "cloudgen-tg" {
+  name     = "AlbTargetGroup"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.main.id
+  health_check {
+    enabled             = true
+    healthy_threshold   = 3
+    interval            = 10
+    matcher             = 200
+    path                = "/"
+    port                = "traffic-port"
+    protocol            = "HTTP"
+    timeout             = 3
+    unhealthy_threshold = 2
+  }
+}
+
+resource "aws_alb_listener" "listener_http" {
+  load_balancer_arn = "${aws_alb.cloudgen-alb.arn}"
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    target_group_arn = "${aws_alb_target_group.cloudgen-tg.arn}"
+    type             = "forward"
+  }
+}
+```
+
+**Evidence of Creation of Loadbalancer and Target Groups**
+![lb](/img/lb.png)
+![lb-tg](/img/lb-tg.png)
+![lb-targets](/img/lb-targets.png)
+
+12. __Creation of DB Subnet Group__
+
+Defines a DB Subnet Group resource that allows the RDS instance to be placed in multiple availability zones.
+
+```
+# Creates a DB Subnet group
+resource "aws_db_subnet_group" "db_subnet_group" {
+  name       = "db_subnet_group"
+  subnet_ids = [for subnet in aws_subnet.private_subnets : subnet.id]
+}
+```
+
+13. __Creation Of RDS Server__
+
+Defines an RDS instance resource that will serve as the highly available database for the project.
+
+```
+# Creates a RDS instance
+resource "aws_db_instance" "db_server" {
+  allocated_storage    = 10
+  engine               = "mysql"
+  engine_version       = "5.7.42"
+  instance_class       = "db.t2.micro"
+  db_name              = var.database_name
+  username             = var.database_user
+  password             = var.database_password
+  db_subnet_group_name = aws_db_subnet_group.db_subnet_group.name
+  multi_az             = true
+  vpc_security_group_ids = [aws_security_group.rds_sg.id]
+  skip_final_snapshot = true
+
+  tags = {
+    Name = "CloudGen-RDS-MYSQL"
+  }
+}
+```
+
+**Evidence of RDS creation**
+![rds](/img/rds_act.png)

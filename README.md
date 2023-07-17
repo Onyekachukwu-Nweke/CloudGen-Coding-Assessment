@@ -25,8 +25,9 @@ architecture and instructions to execute the scripts.
   - [Terraform Configuration](#terraform-configuration)
   - [Deploying the Infrastructure](#deploying-the-infrastructure)
   - [Cleanup](#cleanup)
-  - [Challenges Faced on the Project](#challenges-faced-on-the-project)
+  - [Challenges Faced and Solutions on the Project](#challenges-faced-and-solutions-on-the-project)
   - [Technical Trade-offs](#technical-trade-offs)
+  - [References](#references)
 
 
 ## Prerequisites
@@ -621,19 +622,33 @@ terraform destroy -var-file=secret.tfvars
 ```
 Confirm the action by typing "yes" when prompted.
 
-## Challenges Faced on the Project
+## Challenges Faced and Solutions on the Project
 
 Here are some challenges I faced when building this infrastructure:
 
 1. **Infrastructure Complexity:** Setting up an auto-scaling EC2 setup with a load balancer, combined with a highly available RDS instance, can introduce complexity in terms of configuration, networking, and coordination between different components.
 
+**Solution**
+
+I made use of Lucid Charts for Diagramming to produce an infrastructure diagram that served as a guide for me while building the infrastructure of the project.
+
 2. **Networking and Security Considerations:** Ensuring secure communication between the EC2 instances and the RDS instance requires proper networking configurations, security groups, and encryption protocols. Handling network connectivity, firewall rules, and secure data transfer can be complex, and misconfigurations can lead to communication failures or security vulnerabilities.
 
-3. **Resource Provisioning and Dependencies:** Coordinating the provisioning of EC2 instances, load balancers, and the RDS instance with high availability requires careful consideration of dependencies and proper sequencing. Ensuring that all components are created and configured correctly while managing dependencies and potential race conditions can be challenging.
+**Solution**
 
-4. **Cost Optimization:** Achieving the desired scalability and high availability can come with additional costs, such as increased EC2 instances, load balancer usage, elastic ip, nat gateways and RDS instance replication. Balancing performance and redundancy requirements with cost efficiency and optimizing resource allocation can be a challenge, especially when dealing with fluctuating application traffic.
+I made use of route tables to correctly route traffic to the appropriate subnets and there respective security groups.
 
-5. **Integration and Application Compatibility:** Ensuring that the web application is compatible with the auto-scaling setup, load balancer, and RDS instance, including any required database modifications or application configurations, I had to specify the Database engine needed.
+3. **Cost Optimization:** Achieving the desired scalability and high availability can come with additional costs, such as increased EC2 instances, load balancer usage, elastic ip, nat gateways and RDS instance replication. Balancing performance and redundancy requirements with cost efficiency and optimizing resource allocation can be a challenge, especially when dealing with fluctuating application traffic.
+
+**Solution**
+
+I tried to optimize for cost by choosing lower instance type and also checking for high-availability, and avoiding single point of failure in the infrastructure.
+
+4. **Integration and Application Compatibility:** Ensuring that the web application is compatible with the auto-scaling setup, load balancer, and RDS instance, including any required database modifications or application configurations.
+
+**Solution**
+
+To solve this challenge I had to explicitly specify the version of php and rds (mysql) version I needed.
 
 ## Technical Trade-offs
 
@@ -653,3 +668,21 @@ Here are some technical trade-offs, I considered when building this infrastructu
 
 **Evidence Of Deployed Web App**
 ![web app](/img/webapp.png)
+
+## References
+
+Here are some helpful references for further reading:
+
+- [AWS Account Sign-Up](https://aws.amazon.com/free/): Sign up for an AWS account if you don't have one.
+
+- [Getting Started with Terraform](https://learn.hashicorp.com/tutorials/terraform/aws-build?in=terraform/aws-get-started): Guide to installing and setting up Terraform for your first project.
+
+- [Creating an IAM User in AWS](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html): AWS documentation on how to create an IAM user in your AWS account.
+
+- [AWS RDS Provisioning](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html): AWS documentation on provisioning RDS resources.
+
+- [Terraform AWS Instance Resource](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance): Documentation for the Terraform AWS instance resource, which allows you to create EC2 instances.
+
+- [Installing and Configuring AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html): AWS documentation on installing and configuring the AWS CLI for managing your AWS resources.
+
+- [AWS Security Groups](https://registry.terraform.io/providers/hashicorp/aws/3.11.0/docs/resources/security_group): Documentation for the Terraform AWS security group.

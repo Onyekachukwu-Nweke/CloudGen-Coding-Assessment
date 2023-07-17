@@ -73,9 +73,11 @@ The architecture we are going to set up consists of the following components:
 
 9. __Public Subnet:__ Public Subnet is for connecting the resources in the private subnet to the internet securely.
 
-10. __Private Subnet:__ Private Subent is where the sensitive resources like the web app server and database servers to prevent security breach so they are not directly connected to the internet.
+10. __Private Subnet:__ Private Subent is where the sensitive resources like the web app server(EC2) and database servers(RDS mysql) to prevent security breach so they are not directly connected to the internet.
 
 11. __Multi-AZ Deployment:__ I made use of two availability zones to avoid single point of failure for smooth running of our web app, should there be a disaster in one of the AZs.
+
+12. __Security Groups:__ A security group controls the traffic that is allowed to reach and leave the resources that it is associated with.
 
 Here is a diagram illustrating the architecture:
 

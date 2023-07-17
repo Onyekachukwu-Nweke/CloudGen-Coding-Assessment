@@ -28,6 +28,7 @@ architecture and instructions to execute the scripts.
   - [Challenges Faced and Solutions on the Project](#challenges-faced-and-solutions-on-the-project)
   - [Technical Trade-offs](#technical-trade-offs)
   - [References](#references)
+  - [License](#license)
 
 
 ## Prerequisites
@@ -686,3 +687,7 @@ Here are some helpful references for further reading:
 - [Installing and Configuring AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html): AWS documentation on installing and configuring the AWS CLI for managing your AWS resources.
 
 - [AWS Security Groups](https://registry.terraform.io/providers/hashicorp/aws/3.11.0/docs/resources/security_group): Documentation for the Terraform AWS security group.
+
+
+## License
+This project is licensed under the [MIT License](https://github.com/Onyekachukwu-Nweke/CloudGen-Coding-Assessment/blob/main/LICENSE).

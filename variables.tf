@@ -57,6 +57,11 @@ variable "server_info" {
   }
 }
 
+variable "tag_count" {
+  description = "Number of tags"
+  default     = 2
+}
+
 variable "inbound_ports" {
   description = "Ports to open for ingress"
   type    = list(number)

@@ -23,22 +23,22 @@ resource "aws_internet_gateway_attachment" "igw-attach" {
 }
 
 # Create an Elastic IP for NAT Gateway 1
-# resource "aws_eip" "eip1" {
-#   vpc        = true
-#   depends_on = [aws_internet_gateway.internet_gw]
-#   tags = {
-#     Name = "cloudgen-eip1"
-#   }
-# }
+resource "aws_eip" "eip1" {
+  vpc        = true
+  depends_on = [aws_internet_gateway.internet_gw]
+  tags = {
+    Name = "cloudgen-eip1"
+  }
+}
 
-# # Create an Elastic IP for NAT Gateway 2
-# resource "aws_eip" "eip2" {
-#   vpc        = true
-#   depends_on = [aws_internet_gateway.internet_gw]
-#   tags = {
-#     Name = "cloudgen-eip2"
-#   }
-# }
+# Create an Elastic IP for NAT Gateway 2
+resource "aws_eip" "eip2" {
+  vpc        = true
+  depends_on = [aws_internet_gateway.internet_gw]
+  tags = {
+    Name = "cloudgen-eip2"
+  }
+}
 
 # Creates a public subnet in each Availability Zone
 resource "aws_subnet" "public_subnets" {
@@ -47,6 +47,10 @@ resource "aws_subnet" "public_subnets" {
   cidr_block              = cidrsubnet(aws_vpc.main.cidr_block, 8, count.index)
   availability_zone       = var.availability_zones[count.index]
   map_public_ip_on_launch = true
+
+  tags = {
+    "Name" = "cloudgen-pub_sub-${count.index + 1}"
+  }
 }
 
 # Creates a private subnet in each Availability Zone
@@ -56,29 +60,33 @@ resource "aws_subnet" "private_subnets" {
   cidr_block              = cidrsubnet(aws_vpc.main.cidr_block, 8, count.index + 2)
   availability_zone       = var.availability_zones[count.index]
   map_public_ip_on_launch = false
+
+  tags = {
+    "Name" = "cloudgen-priv_sub-${count.index + 1}"
+  }
 }
 
-# # Create NAT Gateway 1
-# resource "aws_nat_gateway" "nat-gatw1" {
-#   allocation_id = aws_eip.eip1.id
-#   subnet_id     = element(aws_subnet.public_subnets[*].id, 0)
+# Create NAT Gateway 1
+resource "aws_nat_gateway" "nat-gatw1" {
+  allocation_id = aws_eip.eip1.id
+  subnet_id     = element(aws_subnet.public_subnets[*].id, 0)
 
-#   tags = {
-#     Name = "cloudgen-nat1"
-#   }
-#   depends_on = [aws_internet_gateway.internet_gw]
-# }
+  tags = {
+    Name = "cloudgen-nat1"
+  }
+  depends_on = [aws_internet_gateway.internet_gw]
+}
 
-# # Create a NAT Gateway 2
-# resource "aws_nat_gateway" "nat-gatw2" {
-#   allocation_id = aws_eip.eip2.id
-#   subnet_id     = element(aws_subnet.public_subnets[*].id, 1)
+# Create a NAT Gateway 2
+resource "aws_nat_gateway" "nat-gatw2" {
+  allocation_id = aws_eip.eip2.id
+  subnet_id     = element(aws_subnet.public_subnets[*].id, 1)
 
-#   tags = {
-#     Name = "cloudgen-nat2"
-#   }
-#   depends_on = [aws_internet_gateway.internet_gw]
-# }
+  tags = {
+    Name = "cloudgen-nat2"
+  }
+  depends_on = [aws_internet_gateway.internet_gw]
+}
 
 # Create Route Table for public sub 1 and 2
 resource "aws_route_table" "pub-rt" {
@@ -95,32 +103,31 @@ resource "aws_route_table" "pub-rt" {
 }
 
 # Create Route Table for private sub 1
-# resource "aws_route_table" "priv-rt1" {
-#   vpc_id = aws_vpc.main.id
+resource "aws_route_table" "priv-rt1" {
+  vpc_id = aws_vpc.main.id
 
-#   route {
-#     cidr_block     = "0.0.0.0/0"
-#     # nat_gateway_id = aws_nat_gateway.nat-gatw1.id
-#     gateway_id = aws_internet_gateway.internet_gw.id
-#   }
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat-gatw1.id
+  }
 
-#   tags = {
-#     Name = "cloudgen-priv-rt1"
-#   }
-# }
+  tags = {
+    Name = "cloudgen-priv-rt1"
+  }
+}
 
 # Create Route Table for private sub 2
-# resource "aws_route_table" "priv-rt2" {
-#   vpc_id = aws_vpc.main.id
-#   route {
-#     cidr_block     = "0.0.0.0/0"
-#     gateway_id = aws_internet_gateway.internet_gw.id
-#   }
+resource "aws_route_table" "priv-rt2" {
+  vpc_id = aws_vpc.main.id
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat-gatw2.id
+  }
 
-#   tags = {
-#     Name = "cloudgen-priv-rt2"
-#   }
-# }
+  tags = {
+    Name = "cloudgen-priv-rt2"
+  }
+}
 
 # Associate public subnet 1 with public route table 1
 resource "aws_route_table_association" "pub-sub1-association" {
@@ -136,14 +143,14 @@ resource "aws_route_table_association" "pub-sub2-association" {
 
 
 # Associate private subnet 1 with private route table 1
-# resource "aws_route_table_association" "priv-sub1-association" {
-#   subnet_id      = aws_subnet.private_subnets[0].id
-#   route_table_id = aws_route_table.priv-rt1.id
-# }
+resource "aws_route_table_association" "priv-sub1-association" {
+  subnet_id      = aws_subnet.private_subnets[0].id
+  route_table_id = aws_route_table.priv-rt1.id
+}
 
-# # Associate private subnet 2 with private route table 2
-# resource "aws_route_table_association" "priv-sub2-association" {
-#   subnet_id      = aws_subnet.private_subnets[1].id
-#   route_table_id = aws_route_table.priv-rt2.id
-# }
+# Associate private subnet 2 with private route table 2
+resource "aws_route_table_association" "priv-sub2-association" {
+  subnet_id      = aws_subnet.private_subnets[1].id
+  route_table_id = aws_route_table.priv-rt2.id
+}
 

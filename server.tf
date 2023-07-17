@@ -14,7 +14,7 @@ resource "aws_launch_template" "cloudgen-launch_temp" {
   }
 
   # User Data is used to provision our web app on the servers
-  user_data = templatefile("user_data.tfpl", { rds_endpoint = "${aws_db_instance.rds.endpoint}", user  = var.database_user , password = var.database_password , dbname = var.database_name })
+  user_data = base64encode(templatefile("userdata.tfpl", { rds_endpoint = "${aws_db_instance.db_server.endpoint}", user  = var.database_user , password = var.database_password , dbname = var.database_name }))
   tags = {
     Name = "cloudgen-launch_temp"
   }
@@ -115,17 +115,27 @@ resource "aws_alb_listener" "listener_http" {
 }
 
 # Creation of RDS security group
-resource "aws_security_group" "rds" {
+resource "aws_security_group" "rds_sg" {
   name        = "rds_sg"
   description = "RDS security group"
 
   vpc_id = aws_vpc.main.id
 
   ingress {
+    description = "ssh"
+    security_groups= [aws_security_group.cloudgen_alb_sg.id]
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [for subnet in aws_subnet.private_subnets : subnet.cidr_block]
+  }
+
+  ingress {
     from_port   = 3306
     to_port     = 3306
     protocol    = "tcp"
-    cidr_blocks = [for subnet in aws_subnet.public_subnets : subnet.cidr_block]
+    security_groups= [aws_security_group.cloudgen_alb_sg.id]
+    cidr_blocks = [for subnet in aws_subnet.private_subnets : subnet.cidr_block]
   }
 }
 
@@ -137,27 +147,19 @@ resource "aws_db_subnet_group" "db_subnet_group" {
 
 # Creates a RDS instance
 resource "aws_db_instance" "db_server" {
-  allocated_storage    = 20
+  allocated_storage    = 10
   engine               = "mysql"
-  engine_version       = "8.0"
+  engine_version       = "5.7.42"
   instance_class       = "db.t2.micro"
   db_name              = var.database_name
   username             = var.database_user
   password             = var.database_password
   db_subnet_group_name = aws_db_subnet_group.db_subnet_group.name
   multi_az             = true
-  vpc_security_group_ids = [aws_security_group.rds.id]
+  vpc_security_group_ids = [aws_security_group.rds_sg.id]
   skip_final_snapshot = true
 
   tags = {
     Name = "CloudGen-RDS-MYSQL"
   }
 }
-
-# output "rds_endpoint" {
-#   value = aws_db_instance.db_server.endpoint
-# }
-
-# output "alb_dns_name" {
-#   value = aws_alb.cloudgen-alb.dns_name
-# }

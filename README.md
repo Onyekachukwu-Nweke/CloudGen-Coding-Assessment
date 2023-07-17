@@ -628,27 +628,27 @@ Here are some challenges I faced when building this infrastructure:
 
 1. **Infrastructure Complexity:** Setting up an auto-scaling EC2 setup with a load balancer, combined with a highly available RDS instance, can introduce complexity in terms of configuration, networking, and coordination between different components.
 
-**Solution**
+  **Solution**
 
-I made use of Lucid Charts for Diagramming to produce an infrastructure diagram that served as a guide for me while building the infrastructure of the project.
+  I made use of Lucid Charts for Diagramming to produce an infrastructure diagram that served as a guide for me while building the infrastructure of the project.
 
 2. **Networking and Security Considerations:** Ensuring secure communication between the EC2 instances and the RDS instance requires proper networking configurations, security groups, and encryption protocols. Handling network connectivity, firewall rules, and secure data transfer can be complex, and misconfigurations can lead to communication failures or security vulnerabilities.
 
-**Solution**
+  **Solution**
 
-I made use of route tables to correctly route traffic to the appropriate subnets and there respective security groups.
+  I made use of route tables to correctly route traffic to the appropriate subnets and there respective security groups.
 
 3. **Cost Optimization:** Achieving the desired scalability and high availability can come with additional costs, such as increased EC2 instances, load balancer usage, elastic ip, nat gateways and RDS instance replication. Balancing performance and redundancy requirements with cost efficiency and optimizing resource allocation can be a challenge, especially when dealing with fluctuating application traffic.
 
-**Solution**
+  **Solution**
 
-I tried to optimize for cost by choosing lower instance type and also checking for high-availability, and avoiding single point of failure in the infrastructure.
+  I tried to optimize for cost by choosing lower instance type and also checking for high-availability, and avoiding single point of failure in the infrastructure.
 
 4. **Integration and Application Compatibility:** Ensuring that the web application is compatible with the auto-scaling setup, load balancer, and RDS instance, including any required database modifications or application configurations.
 
-**Solution**
+  **Solution**
 
-To solve this challenge I had to explicitly specify the version of php and rds (mysql) version I needed.
+  To solve this challenge I had to explicitly specify the version of php and rds (mysql) version I needed.
 
 ## Technical Trade-offs
 

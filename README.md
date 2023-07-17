@@ -16,14 +16,13 @@ architecture and instructions to execute the scripts.
 
 ## Table of Contents
 
-- [Prerequisites](#prerequisites)
-- [Assumptions](#assumptions)
-- [Infrastructure Overview](#infrastructure-overview-of-our-web-application)
-- [Terraform Setup](#terraform-setup)
-- [Terraform Configuration](#terraform-configuration)
-- [Deploying Infrastructure]()
-- [Clean Up]()
-- [Technical Trade-Offs]()
+- [AWS Scalable and Secure Web Application using Terraform](#aws-scalable-and-secure-web-application-using-terraform)
+  - [Table of Contents](#table-of-contents)
+  - [Prerequisites](#prerequisites)
+  - [Assumptions](#assumptions)
+  - [Infrastructure Overview of our Web Application](#infrastructure-overview-of-our-web-application)
+  - [Terraform Setup](#terraform-setup)
+  - [Terraform Configuration](#terraform-configuration)
 
 ## Prerequisites
 Before I began the Project, I had the following:
@@ -103,7 +102,7 @@ provider specifications of the project.
 4. Created a network terraform file (`network.tf`) which contains all AWS network resources
 and configurations of the project.
 
-5. Created a variables file (`variables.tf`) to define any input variables needed for your infrastructure setup.
+5. Created a variables file (`variables.tf`) to define any input variables needed in the infrastructure setup.
 
 6. Create an output file (`outputs.tf`) to define any outputs you want to display after the infrastructure deployment.
 
@@ -149,11 +148,15 @@ resource "aws_vpc" "main" {
 }
 ```
 
+**Evidence of VPC creation**
+![vpc creation](/img/vpc.png)
+
 3. __Creation of Internet Gateway and attachment to VPC__
 
-Define a Internet Gateway resource and attached it to the VPC
+Defines an Internet Gateway resource and attach it to the specified VPC.
 
 ```
+# Creates an internet gateway to route traffic from the internet
 resource "aws_internet_gateway" "internet_gw" {
   tags = {
     Name = var.internet_gw
@@ -167,29 +170,36 @@ resource "aws_internet_gateway_attachment" "igw-attach" {
 }
 ```
 
+**Evidence of Internet Gateway Creation**
+![igw creation](/img/igw.png)
+
 4. __Creation of Elastic IP Addresses__
 
-Defines the Elastic IP that are situated in the public subnet
+Defines the Elastic IP that are situated in the public subnet, that will be used by
+NAT gateways due to its unstable nature (ie it can reset at anytime).
 
 ```
 # Create an Elastic IP for NAT Gateway 1
 resource "aws_eip" "eip1" {
   vpc        = true
-  depends_on = [aws_internet_gateway.igw]
+  depends_on = [aws_internet_gateway.internet_gw]
   tags = {
-    Name = "web_app-eip1"
+    Name = "cloudgen-eip1"
   }
 }
 
 # Create an Elastic IP for NAT Gateway 2
 resource "aws_eip" "eip2" {
   vpc        = true
-  depends_on = [aws_internet_gateway.igw]
+  depends_on = [aws_internet_gateway.internet_gw]
   tags = {
-    Name = "web_app-eip2"
+    Name = "cloudgen-eip2"
   }
 }
 ```
+
+**Evidence of Elastic IP creation**
+![eip](/img/eip.png)
 
 5. __Creation of Both Public and Private Subnets__
 
@@ -200,20 +210,31 @@ Defines the creation of Public and Private subnet in each availability zone
 resource "aws_subnet" "public_subnets" {
   count                   = length(var.availability_zones)
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = cidrsubnet(aws_vpc.example.cidr_block, 8, count.index)
+  cidr_block              = cidrsubnet(aws_vpc.main.cidr_block, 8, count.index)
   availability_zone       = var.availability_zones[count.index]
   map_public_ip_on_launch = true
+
+  tags = {
+    "Name" = "cloudgen-pub_sub-${count.index + 1}"
+  }
 }
 
 # Creates a private subnet in each Availability Zone
 resource "aws_subnet" "private_subnets" {
   count                   = length(var.availability_zones)
   vpc_id                  = aws_vpc.main.id
-  cidr_block              = cidrsubnet(aws_vpc.example.cidr_block, 8, count.index + 2)
+  cidr_block              = cidrsubnet(aws_vpc.main.cidr_block, 8, count.index + 2)
   availability_zone       = var.availability_zones[count.index]
   map_public_ip_on_launch = false
+
+  tags = {
+    "Name" = "cloudgen-priv_sub-${count.index + 1}"
+  }
 }
 ```
+
+**Evidence of Creation of Subnets**
+![subnets](/img/subnets.png)
 
 6. __Creation of NAT Gateways__
 

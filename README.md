@@ -107,7 +107,15 @@ and configurations of the project.
 
 6. Create an output file (`outputs.tf`) to define any outputs you want to display after the infrastructure deployment.
 
-7. Create a server teraaform file (`server.tf`) in the project directory. This file will contain the AWS web server(ec2) and database(rds) resource definitions and their configurations.
+7. Create a server terraform file (`server.tf`) in the project directory. This file will contain the AWS web server(ec2) and database(rds) resource definitions and their configurations.
+
+8. Create a secret terraform file (`secret.tfvars`) in the project directory. This file holds sensitive data and is not normally committed to a public repository.
+
+9. `nginx` file contains a modified version of nginx configuration that will serve the application
+
+10. `index.php` file contains the web application we are provisioning for the project.
+
+11. `userdata.tfpl` file is a user data script that will be used to configure the launch template that the Auto Scaling Group will use.
 
 
 ## Terraform Configuration
